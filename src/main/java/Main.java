@@ -3,8 +3,6 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Map;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import static spark.Spark.*;
 import spark.template.freemarker.FreeMarkerEngine;
@@ -12,6 +10,8 @@ import spark.ModelAndView;
 import static spark.Spark.get;
 
 import com.heroku.sdk.jdbc.DatabaseUrl;
+import java.text.DecimalFormat;
+import java.util.List;
 
 public class Main {
 
@@ -21,7 +21,35 @@ public class Main {
     staticFileLocation("/public");
 
     get("/hello", (req, res) -> "Hello World");
+    
+    get("/tarea4", (req, res) -> {
+        
+        final String FILE_NAME_1 = "dataset1.txt";
+        final String FILE_NAME_2 = "dataset2.txt";
+        DecimalFormat f = new DecimalFormat("##.000");
+        final String[] FILE_NAMES = {FILE_NAME_1, FILE_NAME_2};
+        List<ClassInfo> data;
+//        Controller controller = new Controller();
+        ObjectType result = new ObjectType();
+        String salida = "<p><br>";
+        int count = 1;
+        for(String fileName : FILE_NAMES) {
+            data = AnalizeClass.loadClassInfo(fileName);
+            salida += String.format("Caso de prueba %d<br><table border=\"1\">", count);
+            salida += "<br>";
+            result = AnalizeClass.calculateSizeRange(data);
+            if(count == 1) {
+                salida += String.format("<p>VS = %.5g%n LOC/Method<br>S =  %.5g%n LOC/Method<br>M = %.4g%n LOC/Method<br>L = %.4g%n LOC/Method<br>VL = %.4g%n LOC/Method<br></p>", result.getVerySmall(), result.getSmall(), result.getMedium(), result.getLarge(), result.getVeryLarge());
 
+            }else {
+                salida += String.format("<p>VS = %.5g%n pages/Chapter<br>S =  %.5g%n pages/Chapter<br>M = %.4g%n pages/Chapter<br>L = %.4g%n pages/Chapter<br>VL = %.4g%n pages/Chapter<br></p>", result.getVerySmall(), result.getSmall(), result.getMedium(), result.getLarge(), result.getVeryLarge());
+ 
+            }
+            count++;
+        }
+        return salida;
+    });
+    
     get("/", (request, response) -> {
             Map<String, Object> attributes = new HashMap<>();
             attributes.put("message", "Hello World!");
